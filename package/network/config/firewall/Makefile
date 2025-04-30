@@ -9,17 +9,19 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=firewall
-PKG_RELEASE:=4
+PKG_RELEASE:=2
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL=$(PROJECT_GIT)/project/firewall3.git
-PKG_SOURCE_DATE:=2019-11-22
-PKG_SOURCE_VERSION:=8174814a507489ebbe8bb85c1004e1f02919ca82
-PKG_MIRROR_HASH:=84e0cca2d47470bdb1788a8ae044cc425be8ff650a1137474ba43a15040085da
+PKG_SOURCE_DATE:=2024-10-18
+PKG_SOURCE_VERSION:=1aef9791a21e3d15d4357060f09a7bb9ed3d6e4e
+PKG_MIRROR_HASH:=61a4f03a34edf5bf25c13b7ae04e4be40ecbaebff77b9f2d1e730dcaa2c77143
 PKG_MAINTAINER:=Jo-Philipp Wich <jo@mein.io>
 PKG_LICENSE:=ISC
 
 PKG_CONFIG_DEPENDS := CONFIG_IPV6
+
+PKG_BUILD_FLAGS:=gc-sections lto
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
@@ -28,9 +30,9 @@ define Package/firewall
   SECTION:=net
   CATEGORY:=Base system
   TITLE:=OpenWrt C Firewall
-  DEPENDS:=+libubox +libubus +libuci +libip4tc +IPV6:libip6tc +libxtables \
-	+kmod-ipt-core +kmod-ipt-conntrack +IPV6:kmod-nf-conntrack6 +kmod-ipt-nat \
-	+iptables-mod-fullconenat
+  DEPENDS:=+libubox +libubus +libuci +libip4tc +IPV6:libip6tc +libiptext +IPV6:libiptext6 +libxtables +kmod-ipt-core +kmod-ipt-conntrack +IPV6:kmod-nf-conntrack6 +kmod-ipt-nat
+  PROVIDES:=uci-firewall
+  CONFLICTS:=firewall4
 endef
 
 define Package/firewall/description
@@ -42,8 +44,6 @@ define Package/firewall/conffiles
 /etc/firewall.user
 endef
 
-TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
-TARGET_LDFLAGS += -Wl,--gc-sections -flto
 CMAKE_OPTIONS += $(if $(CONFIG_IPV6),,-DDISABLE_IPV6=1)
 
 define Package/firewall/install
